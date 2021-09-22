@@ -34,7 +34,7 @@ let Board = function(id) {
             // touches the bottom
             if(x0 >= height) return true;
 
-            // collide with other pieces
+            // collides with other pieces
             let self = prev.find(node => node[0] === x0 && node[1] === y0);
             if(positions[x0][y0] && !self) {
                 console.log(`positions[${x0}][${y0}]`)
@@ -150,6 +150,7 @@ let Board = function(id) {
     })();
 
     return {
+        width,
         piece,
         clearTrace,
         drawPiece,

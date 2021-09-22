@@ -45,8 +45,11 @@ $(function(){
 
         if(e.key === 'ArrowLeft' || e.key === 'a') {
             piece.moveLeft();
+            // revert positions if touches the wall
+            if(touchSideWall(piece.vertices)) piece.moveRight();
         }else if(e.key === 'ArrowRight' || e.key === 'd') {
             piece.moveRight();
+            if(touchSideWall(piece.vertices)) piece.moveLeft();
         }else if(e.key === 'ArrowDown' || e.key === 's') {
             if(!accelerating) accelerating = true;
         }else if(e.key === 'z') {
@@ -70,5 +73,9 @@ $(function(){
                 doNothing = false;
             }, 100);
         }
+    }
+
+    function touchSideWall(vertices) {
+        return vertices.find(vertex => vertex[1] < 0 || vertex[1] >= board.width);
     }
 });
