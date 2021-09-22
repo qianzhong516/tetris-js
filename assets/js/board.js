@@ -37,7 +37,6 @@ let Board = function(id) {
             // collides with other pieces
             let self = prev.find(node => node[0] === x0 && node[1] === y0);
             if(positions[x0][y0] && !self) {
-                console.log(`positions[${x0}][${y0}]`)
                 return true;
             }
         }
@@ -68,9 +67,10 @@ let Board = function(id) {
     }
 
     spawnPiece = function() {
-        // random function here
-        let [x, y] = startPos['Z'];
-        let p = new Tetromino('Z', x, y);
+        let idx = Math.floor(Math.random() * Object.keys(startPos).length);
+        let shape = Object.keys(startPos)[idx];
+        let [x, y] = startPos[shape];
+        let p = new Tetromino(shape, x, y);
         updatePos(p);
         drawPiece(p);
         return p;
