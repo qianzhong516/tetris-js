@@ -19,13 +19,16 @@ let Board = function(id) {
             T: [1, 4],
             Z: [1, 4]
         },
+        lines = 0,
         piece,
         drawPiece,
         updatePos,
         spawnPiece,
         clearTrace,
         getIndex,
-        collide;
+        collide,
+        cancelLines,
+        renderAll;
     
     collide = function(curr, prev) {
         for(let vertex of curr) {
@@ -54,6 +57,15 @@ let Board = function(id) {
             let idx = getIndex(x0, y0);
             $($(`${id} .tgrid`).get(idx)).css({ background: bg });
         }
+    }
+
+    renderAll = function() {
+        for (let row = 0; row < height; row++) {
+            for (let col = 0; col < width; col++) {
+                let idx = getIndex(row, col);
+                $($(`${id} .tgrid`).get(idx)).css({ background: positions[row][col] });
+            }    
+        }        
     }
 
     drawPiece = function(piece) {
@@ -85,6 +97,36 @@ let Board = function(id) {
             let [x, y] = vertex;
             positions[x][y] = piece.color;
         }
+    }
+
+    cancelLines = function(vertices) {
+        // check lines that the piece takes over
+        let checkedLines = [];
+        let removedLines = [];
+
+        outer: for(let vertex of vertices) {
+            if(!checkedLines.includes(vertex[0])) {
+                checkedLines.push(vertex[0]);
+
+                for(let col of positions[vertex[0]]) {
+                    if(!col) continue outer;
+                }
+
+                removedLines.push(vertex[0]);
+            }
+        }
+
+        // update 2d array
+        positions = positions.filter((_, rowNum) => !removedLines.includes(rowNum));
+
+        for(let _ of removedLines) {
+            positions.unshift(Array.from({ length: width }, () => ''));
+            // update scores
+            lines++;
+        }
+
+        // update board
+        renderAll();
     }
 
     ;(function init() {
@@ -157,6 +199,7 @@ let Board = function(id) {
         spawnPiece,
         collide,
         positions,
-        updatePos
+        updatePos,
+        cancelLines
     };
 }

@@ -5,6 +5,7 @@ $(function(){
         drawPiece = board.drawPiece,
         collide = board.collide,
         updatePos = board.updatePos,
+        cancelLines = board.cancelLines,
         accelerating = false;
 
     // start the game
@@ -20,6 +21,7 @@ $(function(){
             updatePos(piece); // update 2d array
             drawPiece(piece);
         }else {
+            cancelLines(prevPos);
             piece = spawnPiece();
         }
 
