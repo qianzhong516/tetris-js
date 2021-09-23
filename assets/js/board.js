@@ -9,7 +9,7 @@ let Board = function(id) {
         height = 30,
         gridLen = 20,// px
         bg = '#292929',
-        positions = [], // 2d array
+        positions = [], // 2d array, a reference pointer
         startPos = {
             I: [1, 3], // x = 1 to avoid rotating beyond the edge
             J: [0, 4],
@@ -30,19 +30,20 @@ let Board = function(id) {
         cancelLines,
         renderAll;
     
-    collide = function(curr, prev) {
-        for(let vertex of curr) {
+    collide = function(newVertices, piece) {
+        // only detects bottom-side collision.
+        // the piece should keep falling if there is side collision.
+        for(let vertex of newVertices) {
             let [x0, y0] = vertex;
 
             // touches the bottom
             if(x0 >= height) return true;
-
-            // collides with other pieces
-            let self = prev.find(node => node[0] === x0 && node[1] === y0);
-            if(positions[x0][y0] && !self) {
-                return true;
-            }
         }
+
+        // the piece bottom collides with other pieces
+        let bottoms = piece.getBottomSides(height);
+        let touchObstacleAtBottom = bottoms.find(vertex => positions[vertex[0]][vertex[1]]);
+        if(touchObstacleAtBottom) return true;
 
         return false;
     }
@@ -115,16 +116,16 @@ let Board = function(id) {
                 removedLines.push(vertex[0]);
             }
         }
-
-        // update 2d array
-        positions = positions.filter((_, rowNum) => !removedLines.includes(rowNum));
-
-        for(let _ of removedLines) {
+        
+        removedLines.sort((a, b) => a - b);
+        for(let rowNum of removedLines) {
+            // update 2d array
+            positions.splice(rowNum, 1);
             positions.unshift(Array.from({ length: width }, () => ''));
             // update scores
-            lines++;
+            lines++;            
         }
-
+    
         // update board
         renderAll();
     }
