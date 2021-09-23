@@ -118,6 +118,9 @@ Tetromino.prototype.moveRight = function() {
 }
 
 Tetromino.prototype.rotate = function() {
+    
+    if(this.shape === 'O') return this.vertices;
+    
     // rotate by center point
     let [rX, rY] = this.vertices[1];
     let newVertices = this.vertices.map((vertex, i) => {

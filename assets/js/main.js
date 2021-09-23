@@ -11,6 +11,7 @@ $(function(){
         showNextPiece = board.showNextPiece,
         gameBoardClass = board.gameBoardClass,
         accelerating = false,
+        stopFrame = false,
         piece,
         nextPiece;
 
@@ -21,22 +22,23 @@ $(function(){
     nextPiece = showNextPiece();
 
     setTimeout(function perFrame() {
-        let prevPos = [...piece.vertices];
 
-        let newVertices = piece.moveDown();
-
-        if(!collide(newVertices, piece)) {
-            piece.vertices = newVertices;
-            clearTrace(prevPos);
-        }else {
-            cancelLines(prevPos);
-            // piece = spawnPiece();
-            piece = nextPiece;
-            nextPiece = showNextPiece();
+        if(!stopFrame) {
+            let prevPos = [...piece.vertices];
+            let newVertices = piece.moveDown();
+    
+            if(!collide(newVertices, piece)) {
+                piece.vertices = newVertices;
+                clearTrace(prevPos);
+            }else {
+                cancelLines(prevPos);
+                piece = nextPiece;
+                nextPiece = showNextPiece();
+            }
+    
+            updatePos(piece);
+            drawPiece(piece, boardWidth, gameBoardClass);
         }
-
-        updatePos(piece);
-        drawPiece(piece, boardWidth, gameBoardClass);
 
         setTimeout(() => {
             perFrame();
@@ -49,6 +51,7 @@ $(function(){
     $(document).on('keyup', keyupHandler);
 
     function keyupHandler(e) {
+        stopFrame = false;
         if(e.key === 'ArrowDown' || e.key === 's') {
             accelerating = false;
         }
@@ -69,12 +72,28 @@ $(function(){
             if(!touchObstacleOnSides(newVertices, piece)) piece.vertices = newVertices;
 
         }else if(e.key === 'ArrowDown' || e.key === 's') {
+
             if(!accelerating) accelerating = true;
 
         }else if(e.key === 'z') {
+            stopFrame= true;
             piece.vertices = piece.rotate();
             // revert positions if goes beyond the side walls
             revertPositions(piece);
+
+            // prevent the piece rotates onto other pieces
+            let overlapOtherPiece = piece.vertices.find(vertex => positions[vertex[0]][vertex[1]] && !oldPiece.selfContains(vertex[0], vertex[1]));
+            if(overlapOtherPiece) {
+                piece.vertices = prevPos;
+                return;
+            }
+
+            // prevent the player from spamming rotations
+            if(collide(piece.vertices, oldPiece)) {
+                cancelLines(prevPos);
+                piece = nextPiece;
+                nextPiece = showNextPiece();
+            }
         }
 
         // update the board immediately after pressing a key
