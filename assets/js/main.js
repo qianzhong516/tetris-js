@@ -1,5 +1,6 @@
 $(function(){
     var board = new Board('#root'),
+        boardWidth = board.width,
         positions = board.positions,
         spawnPiece = board.spawnPiece,
         clearTrace = board.clearTrace,
@@ -7,10 +8,17 @@ $(function(){
         collide = board.collide,
         updatePos = board.updatePos,
         cancelLines = board.cancelLines,
-        accelerating = false;
+        showNextPiece = board.showNextPiece,
+        gameBoardClass = board.gameBoardClass,
+        accelerating = false,
+        piece,
+        nextPiece;
 
     // start the game
-    let piece = spawnPiece();
+    piece = spawnPiece();
+    updatePos(piece);
+    drawPiece(piece, boardWidth, gameBoardClass);
+    nextPiece = showNextPiece();
 
     setTimeout(function perFrame() {
         let prevPos = [...piece.vertices];
@@ -20,12 +28,15 @@ $(function(){
         if(!collide(newVertices, piece)) {
             piece.vertices = newVertices;
             clearTrace(prevPos);
-            updatePos(piece); // update 2d array
-            drawPiece(piece);
         }else {
             cancelLines(prevPos);
-            piece = spawnPiece();
+            // piece = spawnPiece();
+            piece = nextPiece;
+            nextPiece = showNextPiece();
         }
+
+        updatePos(piece);
+        drawPiece(piece, boardWidth, gameBoardClass);
 
         setTimeout(() => {
             perFrame();
@@ -70,7 +81,7 @@ $(function(){
         // if collision is found, do not act immediately to leave some time for player's 'final movement'
         if(!collide(piece.vertices, oldPiece)) {
             clearTrace(prevPos);
-            drawPiece(piece);
+            drawPiece(piece, boardWidth, gameBoardClass);
             updatePos(piece);
         }
 
@@ -92,9 +103,9 @@ $(function(){
     }
 
     function touchObstacleOnSides(newVertices, piece) {
-        let sides = piece.getSurroundSides(board.width);
+        let sides = piece.getSurroundSides(boardWidth);
         let touchOtherPiece = sides.find(vertex => positions[vertex[0]][vertex[1]]);
-        return touchOtherPiece || newVertices.find(vertex => vertex[1] < 0 || vertex[1] >= board.width);
+        return touchOtherPiece || newVertices.find(vertex => vertex[1] < 0 || vertex[1] >= boardWidth);
     }
 
     function revertPositions(piece) {
@@ -108,7 +119,7 @@ $(function(){
         });
 
         piece.vertices.forEach(vertex => {
-            if(vertex[1] >= board.width) beyondRight.push(vertex[1] - (board.width - 1));
+            if(vertex[1] >= boardWidth) beyondRight.push(vertex[1] - (boardWidth - 1));
         });
 
         if(beyondLeft.length) {

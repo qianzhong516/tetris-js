@@ -5,19 +5,34 @@ let Board = function(id) {
         return new Board(...arguments);
     }
 
-    var width = 10,
+    var gameBoardClass = 'game-board',
+        width = 10,
         height = 30,
         gridLen = 20,// px
-        bg = '#292929',
+        bg = '#F5F5DC',
         positions = [], // 2d array, a reference pointer
         startPos = {
-            I: [1, 3], // x = 1 to avoid rotating beyond the edge
-            J: [0, 4],
+            I: [2, 3], // x = 1 to avoid rotating beyond the edge
+            J: [1, 4],
             L: [1, 4],
             O: [0, 4],
             S: [1, 4],
             T: [1, 4],
             Z: [1, 4]
+        },
+        dataGameBoardClass = 'data-game-board',
+        dataBoardWidth = 5,
+        dataBoardHeight = 2,
+        dataBoardGridLen = 15,
+        dataBoardBg = '#FFF',
+        dataBoardstartPos = {
+            I: [1, 0], // x = 1 to avoid rotating beyond the edge
+            J: [0, 1],
+            L: [0, 1],
+            O: [0, 1],
+            S: [0, 1],
+            T: [0, 1],
+            Z: [0, 1]
         },
         lines = 0,
         piece,
@@ -28,7 +43,8 @@ let Board = function(id) {
         getIndex,
         collide,
         cancelLines,
-        renderAll;
+        renderAll,
+        showNextPiece;
     
     collide = function(newVertices, piece) {
         // only detects bottom-side collision.
@@ -55,41 +71,57 @@ let Board = function(id) {
             // update 2d array
             positions[x0][y0] = ''; 
             // clear prev trace
-            let idx = getIndex(x0, y0);
-            $($(`${id} .tgrid`).get(idx)).css({ background: bg });
+            let idx = getIndex(x0, y0, width);
+            $($(`${id} .${gameBoardClass} .tgrid`).get(idx)).css({ background: bg });
         }
     }
 
     renderAll = function() {
         for (let row = 0; row < height; row++) {
             for (let col = 0; col < width; col++) {
-                let idx = getIndex(row, col);
-                $($(`${id} .tgrid`).get(idx)).css({ background: positions[row][col] });
+                let idx = getIndex(row, col, width);
+                $($(`${id} .${gameBoardClass} .tgrid`).get(idx)).css({ background: positions[row][col] });
             }    
         }        
     }
 
-    drawPiece = function(piece) {
+    drawPiece = function(piece, boardWidth, boardSelector) {
         for(let vertex of piece.vertices) {
             let [x0, y0] = vertex;
 
             // update board
-            let idx = getIndex(x0, y0);
-            $($(`${id} .tgrid`).get(idx)).css({ background: piece.color });
+            let idx = getIndex(x0, y0, boardWidth);
+            $($(`${id} .${boardSelector} .tgrid`).get(idx)).css({ background: piece.color });
         }
     }
 
-    spawnPiece = function() {
+    spawnPiece = function(forDisplay = false) {
+        let pieceForDisplay, pieceForGame;
         let idx = Math.floor(Math.random() * Object.keys(startPos).length);
         let shape = Object.keys(startPos)[idx];
+
+        if(forDisplay) {
+            let [x, y] = dataBoardstartPos[shape];
+            pieceForDisplay = new Tetromino(shape, x, y);
+        }
+
         let [x, y] = startPos[shape];
-        let p = new Tetromino(shape, x, y);
-        updatePos(p);
-        drawPiece(p);
-        return p;
+        pieceForGame = new Tetromino(shape, x, y);
+
+        if(pieceForDisplay) return [pieceForDisplay, pieceForGame];
+        else return pieceForGame;
     }
 
-    getIndex = function(x, y) {
+    showNextPiece = function() {
+        // clear the existing shape
+        $(`${id} .${dataGameBoardClass} .tgrid`).css({ background: '#FFF' });
+
+        let [pieceForDisplay, pieceForGame] = spawnPiece(true);
+        drawPiece(pieceForDisplay, dataBoardWidth, dataGameBoardClass);
+        return pieceForGame;
+    }
+
+    getIndex = function(x, y, width) {
         return x * width + y;
     }
 
@@ -131,10 +163,47 @@ let Board = function(id) {
     }
 
     ;(function init() {
-        let elem = $(id);
-        let boardWrapper = 
+        let elem = $(id),
+            dataBoard = 
             $('<div/>')
-            .addClass('board')
+            .addClass('data-board')
+            .css({
+                marginRight: 50
+            });
+
+        dataBoard.appendTo(elem);
+
+        // draw data board
+        dataBoard.html(`
+            <div class="next"><h3>Next</h3></div>
+            <div><h3>Scores</h3><p class="scores"></p></div>
+            <div><h3>Lines</h3><p class="lines"></p></div>
+        `)
+
+        // draw next piece board
+        drawGridBoard('.data-board .next', dataGameBoardClass, {
+            width: dataBoardWidth, 
+            height: dataBoardHeight, 
+            gridLen: dataBoardGridLen, 
+            bg: dataBoardBg
+        });
+
+        // draw main game board
+        drawGridBoard(id, gameBoardClass, { 
+            width, 
+            height, 
+            gridLen, 
+            bg
+        });
+
+    })();
+
+    function drawGridBoard(appendTo, className, options) {
+        let { width, height, gridLen, bg } = options,
+            elem = $(appendTo),
+            boardWrapper = 
+            $('<div/>')
+            .addClass(className)
             .css({
                 position: 'relative',
                 width: width * gridLen,
@@ -167,30 +236,29 @@ let Board = function(id) {
 
         // draw dividers
         for (let row = 1; row < height; row++) {
-             $('<div/>')
-             .css({
+                $('<div/>')
+                .css({
                 position: 'absolute',
                 top: row * gridLen,
                 width: width * gridLen,
                 height: '1px',
                 background: '#f2f2f2',
-             }).appendTo(boardWrapper);     
+                }).appendTo(boardWrapper);     
         }
 
         for (let col = 1; col < width; col++) {
-             $('<div/>')
-             .css({
+                $('<div/>')
+                .css({
                 position: 'absolute',
                 left: col * gridLen,
                 width: '1px',
                 height: height * gridLen,
                 background: '#f2f2f2',
-             }).appendTo(boardWrapper);     
+                }).appendTo(boardWrapper);     
         }
         
         boardWrapper.appendTo(elem);
-
-    })();
+    }
 
     return {
         width,
@@ -201,6 +269,8 @@ let Board = function(id) {
         collide,
         positions,
         updatePos,
-        cancelLines
+        cancelLines,
+        showNextPiece,
+        gameBoardClass
     };
 }
