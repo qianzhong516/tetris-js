@@ -67,6 +67,7 @@ $(function(){
     function keydownHandler(e) {
         let prevPos = [...piece.vertices];
         let oldPiece = {...piece};
+        clearTrace(prevPos);
 
         if(e.key === 'ArrowLeft' || e.key === 'a') {
             let newVertices = piece.moveLeft();
@@ -87,26 +88,13 @@ $(function(){
 
             // prevent the piece rotates onto other pieces
             let overlapOtherPiece = piece.vertices.find(vertex => positions[vertex[0]][vertex[1]] && !oldPiece.selfContains(vertex[0], vertex[1]));
-            if(overlapOtherPiece) {
-                piece.vertices = prevPos;
-                return;
-            }
-
-            // prevent the player from spamming rotations
-            if(collide(piece.vertices, oldPiece)) {
-                removeLines(prevPos);
-                piece = nextPiece;
-                nextPiece = showNextPiece();
-            }
+            if(overlapOtherPiece) piece.vertices = prevPos;
         }
 
         // update the board immediately after pressing a key
-        // if collision is found, do not act immediately to leave some time for player's 'final movement'
-        if(!collide(piece.vertices, oldPiece)) {
-            clearTrace(prevPos);
-            drawPiece(piece, boardWidth, gameBoardClass);
-            updatePos(piece);
-        }
+        // do not act to collision immediately to leave some time for player's 'final movement'
+        drawPiece(piece, boardWidth, gameBoardClass);
+        updatePos(piece);
 
     }
 
