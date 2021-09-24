@@ -12,7 +12,7 @@ let Board = function(id) {
         bg = '#F5F5DC',
         positions = [], // 2d array, a reference pointer
         startPos = {
-            I: [2, 3], // x = 1 to avoid rotating beyond the edge
+            I: [2, 3], // x = 2 to avoid rotating beyond the edge
             J: [1, 4],
             L: [1, 4],
             O: [0, 4],
@@ -26,7 +26,7 @@ let Board = function(id) {
         dataBoardGridLen = 15,
         dataBoardBg = '#FFF',
         dataBoardstartPos = {
-            I: [1, 0], // x = 1 to avoid rotating beyond the edge
+            I: [1, 0],
             J: [0, 1],
             L: [0, 1],
             O: [0, 1],
@@ -35,6 +35,7 @@ let Board = function(id) {
             Z: [0, 1]
         },
         lines = 0,
+        scores = 0,
         piece,
         drawPiece,
         updatePos,
@@ -155,9 +156,15 @@ let Board = function(id) {
             positions.splice(rowNum, 1);
             positions.unshift(Array.from({ length: width }, () => ''));
             // update scores
-            lines++;            
+            lines++;   
         }
-    
+
+        // i.e, lines = 3, scores += 1 + 2 + 3
+        scores += removedLines.reduce((acc, _, i) => acc += i + 1, 0);
+
+        $(`${id} .data-board .scores`).text(scores);
+        $(`${id} .data-board .lines`).text(lines);  
+
         // update board
         renderAll();
     }
@@ -176,8 +183,8 @@ let Board = function(id) {
         // draw data board
         dataBoard.html(`
             <div class="next"><h3>Next</h3></div>
-            <div><h3>Scores</h3><p class="scores"></p></div>
-            <div><h3>Lines</h3><p class="lines"></p></div>
+            <div><h3>Scores</h3><p class="scores">0</p></div>
+            <div><h3>Lines</h3><p class="lines">0</p></div>
         `)
 
         // draw next piece board

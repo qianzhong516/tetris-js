@@ -13,7 +13,8 @@ $(function(){
         accelerating = false,
         stopFrame = false,
         piece,
-        nextPiece;
+        nextPiece,
+        timer;
 
     // start the game
     piece = spawnPiece();
@@ -21,7 +22,7 @@ $(function(){
     drawPiece(piece, boardWidth, gameBoardClass);
     nextPiece = showNextPiece();
 
-    setTimeout(function perFrame() {
+    timer = setTimeout(function perFrame() {
 
         if(!stopFrame) {
             let prevPos = [...piece.vertices];
@@ -34,6 +35,12 @@ $(function(){
                 cancelLines(prevPos);
                 piece = nextPiece;
                 nextPiece = showNextPiece();
+
+                if(gameOver()) {
+                    clearTimeout(timer);
+                    alert('Game over!');
+                    return;
+                }
             }
     
             updatePos(piece);
@@ -63,16 +70,13 @@ $(function(){
 
         if(e.key === 'ArrowLeft' || e.key === 'a') {
             let newVertices = piece.moveLeft();
-            if(!touchObstacleOnSides(newVertices, piece)) {
-                piece.vertices = newVertices;
-            }
-
+            if(!touchObstacleOnSides(newVertices, piece)) piece.vertices = newVertices;
+            
         }else if(e.key === 'ArrowRight' || e.key === 'd') {
             let newVertices = piece.moveRight();
             if(!touchObstacleOnSides(newVertices, piece)) piece.vertices = newVertices;
 
         }else if(e.key === 'ArrowDown' || e.key === 's') {
-
             if(!accelerating) accelerating = true;
 
         }else if(e.key === 'z') {
@@ -161,5 +165,9 @@ $(function(){
             }
         }
 
+    }
+
+    function gameOver() {
+        return positions[0].find(value => value !== '');
     }
 });

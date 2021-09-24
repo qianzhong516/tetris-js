@@ -55,7 +55,7 @@ let Tetromino = function(shape, x, y) {
 
     }else if(shape === 'O') {
         
-        color = '#f0f04f';
+        color = '#f7de39';
         vertices.push([startX, startY + 1]);
         vertices.push([startX + 1, startY + 1]);
         vertices.push([startX + 1, startY]);
