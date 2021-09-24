@@ -43,7 +43,7 @@ let Board = function(id) {
         clearTrace,
         getIndex,
         collide,
-        cancelLines,
+        removeLines,
         renderAll,
         showNextPiece;
     
@@ -133,7 +133,7 @@ let Board = function(id) {
         }
     }
 
-    cancelLines = function(vertices) {
+    removeLines = function(vertices) {
         // check lines that the piece takes over
         let checkedLines = [];
         let removedLines = [];
@@ -276,7 +276,7 @@ let Board = function(id) {
         collide,
         positions,
         updatePos,
-        cancelLines,
+        removeLines,
         showNextPiece,
         gameBoardClass
     };

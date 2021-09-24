@@ -7,7 +7,7 @@ $(function(){
         drawPiece = board.drawPiece,
         collide = board.collide,
         updatePos = board.updatePos,
-        cancelLines = board.cancelLines,
+        removeLines = board.removeLines,
         showNextPiece = board.showNextPiece,
         gameBoardClass = board.gameBoardClass,
         accelerating = false,
@@ -32,7 +32,7 @@ $(function(){
                 piece.vertices = newVertices;
                 clearTrace(prevPos);
             }else {
-                cancelLines(prevPos);
+                removeLines(prevPos);
                 piece = nextPiece;
                 nextPiece = showNextPiece();
 
@@ -94,7 +94,7 @@ $(function(){
 
             // prevent the player from spamming rotations
             if(collide(piece.vertices, oldPiece)) {
-                cancelLines(prevPos);
+                removeLines(prevPos);
                 piece = nextPiece;
                 nextPiece = showNextPiece();
             }
