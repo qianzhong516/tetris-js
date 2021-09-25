@@ -36,6 +36,7 @@ let Board = function(id) {
         },
         lines = 0,
         scores = 0,
+        level = 1,
         piece,
         drawPiece,
         updatePos,
@@ -45,7 +46,8 @@ let Board = function(id) {
         collide,
         removeLines,
         renderAll,
-        showNextPiece;
+        showNextPiece,
+        getLevel;
     
     collide = function(newVertices, piece) {
         // only detects bottom-side collision.
@@ -161,12 +163,18 @@ let Board = function(id) {
 
         // i.e, lines = 3, scores += 1 + 2 + 3
         scores += removedLines.reduce((acc, _, i) => acc += i + 1, 0);
+        level = Math.floor(scores/5 + 1);
 
         $(`${id} .data-board .scores`).text(scores);
         $(`${id} .data-board .lines`).text(lines);  
+        $(`${id} .data-board .level`).text(level);
 
         // update board
         renderAll();
+    }
+
+    getLevel = function() {
+        return level;
     }
 
     ;(function init() {
@@ -183,8 +191,9 @@ let Board = function(id) {
         // draw data board
         dataBoard.html(`
             <div class="next"><h3>Next</h3></div>
-            <div><h3>Scores</h3><p class="scores">0</p></div>
-            <div><h3>Lines</h3><p class="lines">0</p></div>
+            <div><h3>Scores</h3><p class="scores">${scores}</p></div>
+            <div><h3>Lines</h3><p class="lines">${lines}</p></div>
+            <div><h3>Level</h3><p class="level">${level}</p></div>
         `)
 
         // draw next piece board
@@ -270,14 +279,15 @@ let Board = function(id) {
     return {
         width,
         piece,
+        positions,
+        gameBoardClass,
         clearTrace,
         drawPiece,
         spawnPiece,
         collide,
-        positions,
         updatePos,
         removeLines,
         showNextPiece,
-        gameBoardClass
+        getLevel
     };
 }

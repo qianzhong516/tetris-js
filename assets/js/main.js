@@ -2,6 +2,7 @@ $(function(){
     var board = new Board('#root'),
         boardWidth = board.width,
         positions = board.positions,
+        getLevel = board.getLevel,
         spawnPiece = board.spawnPiece,
         clearTrace = board.clearTrace,
         drawPiece = board.drawPiece,
@@ -47,9 +48,15 @@ $(function(){
             drawPiece(piece, boardWidth, gameBoardClass);
         }
 
-        setTimeout(() => {
-            perFrame();
-        }, accelerating ? 50 : 300);
+        let freq = 500 - getLevel() * 50;
+        if(freq > 0) {
+            setTimeout(() => {
+                perFrame();
+            }, accelerating ? 50 : freq);
+        }else {
+            clearTimeout(timer);
+            alert('You are unbeatable!');
+        }
 
     }, 0);
 
