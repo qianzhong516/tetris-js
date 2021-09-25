@@ -9,3 +9,4 @@ Demo Link: https://qianzhong516.github.io/tetris-js
 
 ## Scoring System
 * 1 + 2 + 3 + ... + n scores for n filled lines.
+* There are 10 levels to play through.
